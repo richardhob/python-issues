@@ -1,0 +1,56 @@
+diff -r 406c6fd7e753 Lib/shutil.py
+--- a/Lib/shutil.py	Sun Mar 17 21:53:48 2013 -0400
++++ b/Lib/shutil.py	Mon Mar 18 14:58:38 2013 -0700
+@@ -436,9 +436,10 @@
+     is false and onerror is None, an exception is raised.
+ 
+     """
++    errors = []
+     if ignore_errors:
+         def onerror(*args):
+-            pass
++            errors.append(args)
+     elif onerror is None:
+         def onerror(*args):
+             raise
+@@ -452,12 +453,12 @@
+             orig_st = os.lstat(path)
+         except Exception:
+             onerror(os.lstat, path, sys.exc_info())
+-            return
++            return errors
+         try:
+             fd = os.open(path, os.O_RDONLY)
+         except Exception:
+             onerror(os.lstat, path, sys.exc_info())
+-            return
++            return errors
+         try:
+             if os.path.samestat(orig_st, os.fstat(fd)):
+                 _rmtree_safe_fd(fd, path, onerror)
+@@ -474,7 +475,8 @@
+         finally:
+             os.close(fd)
+     else:
+-        return _rmtree_unsafe(path, onerror)
++        _rmtree_unsafe(path, onerror)
++    return errors
+ 
+ # Allow introspection of whether or not the hardening against symlink
+ # attacks is supported on the current platform
+diff -r 406c6fd7e753 Lib/test/test_shutil.py
+--- a/Lib/test/test_shutil.py	Sun Mar 17 21:53:48 2013 -0400
++++ b/Lib/test/test_shutil.py	Mon Mar 18 14:58:38 2013 -0700
+@@ -180,10 +180,7 @@
+         # test that ignore_errors option is honored
+         shutil.rmtree(filename, ignore_errors=True)
+         self.assertTrue(os.path.exists(filename))
+-        errors = []
+-        def onerror(*args):
+-            errors.append(args)
+-        shutil.rmtree(filename, onerror=onerror)
++        errors = shutil.rmtree(filename, ignore_errors=True)
+         self.assertEqual(len(errors), 2)
+         self.assertIs(errors[0][0], os.listdir)
+         self.assertEqual(errors[0][1], filename)
+
