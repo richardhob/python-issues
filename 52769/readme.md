@@ -4,6 +4,7 @@
 - [Github Issue](https://github.com/python/cpython/issues/52769)
 - [Bad Copy of Github Issue](./issue-git.md)
 - [Copy of Patch From Original Issue](./rmtree_ignore_errors_returns_list.patch)
+- [Python Pre 3.12 shutil.rmtree Docs](./shutil_rmtree.md)
 
 ## Context
 
@@ -44,12 +45,47 @@ diff -r 406c6fd7e753 Lib/shutil.py
 
 `bitdancer` likes this solution, but it also needs a documentation update.
 
+## Read documentation
+
+The latest `shutil.rmtree` documentation indicates that the `onerror` parameter is deprecated ... so is there anything to do here?
+
+The `onexc` function replaces the `onerror` function, and gets a little more information from `sys.exc_info` when it is called.
+
+From what I can tell, this will affect `onexc` as well as `onerror`.
+
 ## Checklist
 
-- [ ] Build latest Python (PASS)
-- [ ] Run unittests (PASS)
-- [ ] Update shutil tests (FAIL)
-- [ ] Update shutil (PASS)
-- [ ] Update DOCS
-    - [ ] Function Docs
-    - [ ] User manual docs
+- [X] Read documentation
+- [ ] Create Plan
+- [ ] Create failing testcase with `onerror`
+- [ ] Create failing testcase with `onexc`
+- [ ] Python Unittests [PASS]
+- [ ] Modify `shutil.rmtree` 
+    - [ ] My unit tests pass
+    - [ ] global unit tests pass 
+- [ ] Modify `shutil.rmtree` tests
+- [ ] Add my tests to Python
+- [ ] Write explanation (with a bit of summary)
+- [ ] Create Merge Request
+
+### Tests
+
+The `onerror` tests should use the `onerror` function provided in the Issue. 
+
+Error handler:
+
+``` python
+def handleRmtreeError(func, path, exc):
+  excvalue = exc[1]
+  if excvalue.errno == errno.EACCES:
+    if func in (os.rmdir, os.remove):
+      parentpath = path.rpartition('/')[0]
+      os.chmod(parentpath, stat.S_IRWXU) # 0700
+      func(path)
+    elif func is os.listdir:
+      # If this chmod fails, infinite recursion?
+      os.chmod(path, stat.S_IRWXU) # 0700
+      rmtree(path=path, ignore_errors=False, onerror=handleRmtreeError)
+  else:
+      raise
+```
