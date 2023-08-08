@@ -43,7 +43,7 @@ try:
     names = os.listdir(path)
 except os.error, err:
     onerror(os.listdir, path, sys.exc_info())
-return
+    return
 ```
 
 That is, this is another case in which we can't continue even if onerror returns. However, onerror is free to correct the problem and then call rmtree. (The danger, of course, is infinite recursion, but I don't think it is our responsibility to protect the author of an onerror handler from that potential mistake.)
@@ -57,8 +57,6 @@ Your solution sounds fine to me.
 Currently we don't get a NameError because "names" is set to [] before the "try". What happens is that the "for" is skipped and later rmdir fails with "directory not empty".
 
 # tarekziade
-
-
 
 The whole error handling in rmtree strikes me as something that cannot be used efficiently. (see also bpo-7969).
 
