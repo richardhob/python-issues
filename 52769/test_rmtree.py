@@ -40,3 +40,9 @@ def test_rmtree_no_fix(tree):
 
     with pytest.raises(ValueError):
         shutil.rmtree(tree, onerror=no_fix)
+
+def test_rmtree_no_fix_no_error(tree):
+    def no_fix(function, path, exc_info):
+        pass
+
+    shutil.rmtree(tree, onerror=no_fix)
