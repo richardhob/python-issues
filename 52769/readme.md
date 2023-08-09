@@ -53,10 +53,39 @@ The `onexc` function replaces the `onerror` function, and gets a little more inf
 
 From what I can tell, this will affect `onexc` as well as `onerror`.
 
+## Possible location in Python 
+
+``` python
+def _rmtree_unsafe(path, onexc):
+    try:
+        with os.scandir(path) as scandir_it:
+            entries = list(scandir_it)
+    except OSError as err:
+        onexc(os.scandir, path, err)
+        entries = []
+    for entry in entries:
+        ...
+```
+
+and 
+
+``` python
+def _rmtree_safe_fd(topfd, path, onexc):
+    try:
+        with os.scandir(topfd) as scandir_it:
+            entries = list(scandir_it)
+    except OSError as err:
+        err.filename = path
+        onexc(os.scandir, path, err)
+        return
+    for entry in entries:
+        ...
+```
+
 ## Checklist
 
 - [X] Read documentation
-- [ ] Create Plan
+- [X] Create Plan
 - [ ] Create failing testcase with `onerror`
 - [ ] Create failing testcase with `onexc`
 - [ ] Python Unittests [PASS]
@@ -68,24 +97,3 @@ From what I can tell, this will affect `onexc` as well as `onerror`.
 - [ ] Write explanation (with a bit of summary)
 - [ ] Create Merge Request
 
-### Tests
-
-The `onerror` tests should use the `onerror` function provided in the Issue. 
-
-Error handler:
-
-``` python
-def handleRmtreeError(func, path, exc):
-  excvalue = exc[1]
-  if excvalue.errno == errno.EACCES:
-    if func in (os.rmdir, os.remove):
-      parentpath = path.rpartition('/')[0]
-      os.chmod(parentpath, stat.S_IRWXU) # 0700
-      func(path)
-    elif func is os.listdir:
-      # If this chmod fails, infinite recursion?
-      os.chmod(path, stat.S_IRWXU) # 0700
-      rmtree(path=path, ignore_errors=False, onerror=handleRmtreeError)
-  else:
-      raise
-```
