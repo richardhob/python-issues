@@ -1,8 +1,26 @@
 
 import os
 import shutil
+from pathlib import Path
+import unittest.mock
+
+import stat
+import errno
 
 import pytest
+
+def merge_request_onerror(func, path, exc):
+    excvalue = exc[1]
+    if excvalue.errno == errno.EACCES:
+        if func in (os.rmdir, os.remove):
+            parent_path = Path(path).parent
+            os.chmod(parent_path, stat.S_IRWXU) # 0700
+            func(path)
+        elif func is os.listdir:
+            os.chmod(path, stat.S_IRWXU) # 0700
+            shutil.rmtree(path, ignore_errors=False, onerror=merge_request_onerror)
+    else:
+        raise ValueError("Could not find a way to fix")
 
 LEVEL_1 = ['a', 'b', 'c']
 LEVEL_2 = ['a1', 'b1', 'c1']
@@ -24,7 +42,8 @@ def tree(request, tmp_path):
     path.chmod(0o555)
 
     def _undo_chmod():
-        path.chmod(0o750)
+        if path.exists():
+            path.chmod(0o750)
 
     request.addfinalizer(_undo_chmod)
 
@@ -46,3 +65,11 @@ def test_rmtree_no_fix_no_error(tree):
         pass
 
     shutil.rmtree(tree, onerror=no_fix)
+
+def test_rmtree_fix_merge_request(tree):
+    shutil.rmtree(tree, onerror=merge_request_onerror)
+
+def test_rmtree_error_listdir():
+    my_onerror = unittest.mock.MagicMock()
+    shutil.rmtree('DOES NOT EXIST DIR 123', onerror=my_onerror)
+    my_onerror.assert_called_once()
