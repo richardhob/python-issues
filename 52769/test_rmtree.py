@@ -71,5 +71,11 @@ def test_rmtree_fix_merge_request(tree):
 
 def test_rmtree_error_listdir():
     my_onerror = unittest.mock.MagicMock()
-    shutil.rmtree('DOES NOT EXIST DIR 123', onerror=my_onerror)
+    errors = shutil.rmtree('DOES NOT EXIST DIR 123', onerror=my_onerror)
     my_onerror.assert_called_once()
+    assert errors == []
+
+def test_rmtree_error_ignore(tree):
+    errors = shutil.rmtree('DOES NOT EXIST DIR 123', ignore_errors=True)
+    assert len(errors) == 1
+    assert errors[0][0] == os.lstat
