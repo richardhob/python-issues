@@ -159,7 +159,6 @@ Now maybe we do miss some APIs to check for a file tree sanity, like:
 -    is there any link that will make rmtree() fail ?
 -    etc/
 
-
 # tarekziade
 
 Looking at your example rubenlm, it appears like a case that is missing in rmtree().
