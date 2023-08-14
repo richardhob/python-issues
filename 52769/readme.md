@@ -86,14 +86,11 @@ def _rmtree_safe_fd(topfd, path, onexc):
 
 - [X] Read documentation
 - [X] Create Plan
-- [ ] Create failing testcase with `onerror`
-- [ ] Create failing testcase with `onexc`
 - [ ] Python Unittests [PASS]
-- [ ] Modify `shutil.rmtree` 
-    - [ ] My unit tests pass
+- [X] Modify `shutil.rmtree` 
+    - [X] My unit tests pass
     - [ ] global unit tests pass 
 - [ ] Modify `shutil.rmtree` tests
-- [ ] Add my tests to Python
 - [ ] Write explanation (with a bit of summary)
 - [ ] Create Merge Request
 
