@@ -5,6 +5,7 @@
 - [Bad Copy of Github Issue](./issue-git.md)
 - [Copy of Patch From Original Issue](./rmtree_ignore_errors_returns_list.patch)
 - [Python Pre 3.12 shutil.rmtree Docs](./shutil_rmtree.md)
+- [Merge Request Text](./merge_request.md)
 
 ## Context
 
@@ -86,11 +87,11 @@ def _rmtree_safe_fd(topfd, path, onexc):
 
 - [X] Read documentation
 - [X] Create Plan
-- [ ] Python Unittests [PASS]
+- [X] Python Unittests [PASS]
 - [X] Modify `shutil.rmtree` 
     - [X] My unit tests pass
-    - [ ] global unit tests pass 
-- [ ] Modify `shutil.rmtree` tests
-- [ ] Write explanation (with a bit of summary)
+    - [X] global unit tests pass 
+- [X] Modify `shutil.rmtree` tests
+- [X] Write explanation (with a bit of summary)
 - [ ] Create Merge Request
 
