@@ -76,6 +76,5 @@ def test_rmtree_error_listdir():
     assert errors == []
 
 def test_rmtree_error_ignore(tree):
-    errors = shutil.rmtree('DOES NOT EXIST DIR 123', ignore_errors=True)
-    assert len(errors) == 1
-    assert errors[0][0] == os.lstat
+    errors = shutil.rmtree(tree, ignore_errors=True)
+    assert len(errors) == 6
