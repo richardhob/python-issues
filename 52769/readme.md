@@ -1,11 +1,16 @@
 # shutil.rmtree and os.listdir cannot recover on error conditions
 
+- [Issue](https://github.com/python/cpython/issues/52769)
+- [My Python Branch](https://github.com/richardhob/cpython/tree/issue52769-rmtree-onerror)
+- [Merge Request Text](./merge_request.md)
+
+## References 
+
 - [Original Issue in Python Bug Tracker](https://bugs.python.org/issue8523)
 - [Github Issue](https://github.com/python/cpython/issues/52769)
-- [Bad Copy of Github Issue](./issue-git.md)
+- [Copy of Github Issue](./issue-git.md)
 - [Copy of Patch From Original Issue](./rmtree_ignore_errors_returns_list.patch)
 - [Python Pre 3.12 shutil.rmtree Docs](./shutil_rmtree.md)
-- [Merge Request Text](./merge_request.md)
 
 ## Context
 
