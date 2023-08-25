@@ -1,0 +1,47 @@
+diff -r dc0498f4d68e Doc/library/timeit.rst
+--- a/Doc/library/timeit.rst	Mon Sep 13 18:45:02 2010 +0200
++++ b/Doc/library/timeit.rst	Mon Sep 13 19:21:09 2010 +0200
+@@ -22,25 +22,27 @@
+ 
+ .. class:: Timer([stmt='pass' [, setup='pass' [, timer=<timer function>]]])
+ 
+-   Class for timing execution speed of small code snippets.
++   Class for timing execution speed of small code snippets. The constructor creates 
++   a function that executes the *setup* statement once and then times some number of 
++   executions of the *stmt* statement (see :meth:`Timer.timeit`). Both statements 
++   default to ``'pass'``. The *timer* parameter defaults to a platform-dependent 
++   timer function (see the module doc string). Both *stmt* and *setup* may contain 
++   multiple statements separated by ``;`` or newlines as long as they donâ€™t contain 
++   multi-line string literals.
+ 
+-   The constructor takes a statement to be timed, an additional statement used for
+-   setup, and a timer function.  Both statements default to ``'pass'``; the timer
+-   function is platform-dependent (see the module doc string).  *stmt* and *setup*
+-   may also contain multiple statements separated by ``;`` or newlines, as long as
+-   they don't contain multi-line string literals.
++   Both *stmt* and *setup* can also be objects that are callable without arguments. 
++   Passing ``testfunc`` rather than ``'testfunc()'`` may reduce the timing overhead. 
++   However, if ``testfunc`` is a Python function, passing its quoted code should have 
++   even less overhead because doing so eliminates an extra function call.
+ 
+-   To measure the execution time of the first statement, use the :meth:`timeit`
+-   method.  The :meth:`repeat` method is a convenience to call :meth:`timeit`
++   To give *stmt* (whether it is a callable name or code string) access to 
++   pre-defined user objects, such as ``testfunc``, *setup* must include an import, 
++   such as ``from __main__ import testfunc``.
++
++   To measure the execution time of *stmt*, use the :meth:`Timer.timeit()` method. 
++   The :meth:`Timer.repeat()` method is a convenience to call :meth:`Timer.timeit()` 
+    multiple times and return a list of results.
+ 
+-   .. versionchanged:: 2.6
+-      The *stmt* and *setup* parameters can now also take objects that are callable
+-      without arguments. This will embed calls to them in a timer function that will
+-      then be executed by :meth:`timeit`.  Note that the timing overhead is a little
+-      larger in this case because of the extra function calls.
+-
+-
+ .. method:: Timer.print_exc([file=None])
+ 
+    Helper to print a traceback from the timed code.
+
