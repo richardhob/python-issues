@@ -2,7 +2,7 @@
 
 - [Issue](https://github.com/python/cpython/issues/52769)
 - [My Python Branch](https://github.com/richardhob/cpython/tree/issue52769-rmtree-onerror)
-- [Merge Request Text](./merge_request.md)
+- [Merge Request](https://github.com/python/cpython/pull/108255#)
 
 ## References 
 
