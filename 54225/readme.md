@@ -2,6 +2,10 @@
 
 - [Issue on Github](https://github.com/python/cpython/issues/54225)
 
+## References
+
+- [sendfile](https://man.freebsd.org/cgi/man.cgi?sendfile(2))
+
 ## Details
 
 It looks like this patch got started, but abandoned. This feature is kinda neat,
@@ -13,9 +17,10 @@ but there is some complexity across platforms... And there are some issues:
 
 So we have a lot of work to do on this one!
 
-- [ ] Learn a bit about sparse files
-- [ ] Create some tests that create Sparse files
-- [ ] Copy them with `shutil.copyfile` and verify they are no longer sparse (Fail)
+- [X] Learn a bit about sparse files
+- [X] Create some tests that create Sparse files
+- [X] Copy them with `shutil.copyfile` and verify they are no longer sparse (Fail)
+- [ ] Does `sendfile` do sparse files?
 - [ ] Update `shutil.copyfile` 
     - [ ] Linux
     - [ ] Windows
@@ -27,4 +32,14 @@ So we have a lot of work to do on this one!
 - [ ] Update docs
 - [ ] Blurb
 - [ ] Merge request
+
+## Where do we put the changes?
+
+In the latest Python code, there's some effort to avoid modifying the
+`copyfileobj` code to preserve backwards compatibility. So it's probably a good
+idea to do that.
+
+Does `os.sendfile` work with sparse files? `python/Modules/posixmodule.c`? Also
+what is `sendfile`?
+
 
