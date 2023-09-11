@@ -1,0 +1,59 @@
+--- shutil-2.6.py	2010-10-02 14:58:21.973892831 +0100
++++ /usr/lib/python2.6/shutil.py	2010-10-02 15:04:31.705905708 +0100
+@@ -21,13 +21,23 @@
+ except NameError:
+     WindowsError = None
+ 
+-def copyfileobj(fsrc, fdst, length=16*1024):
++SPARSE_AUTO   = 0
++SPARSE_ALWAYS = 1
++SPARSE_NEVER  = 2
++
++def copyfileobj(fsrc, fdst, length=16*1024, make_sparse=False):
+     """copy data from file-like object fsrc to file-like object fdst"""
+     while 1:
+         buf = fsrc.read(length)
+         if not buf:
+             break
+-        fdst.write(buf)
++        if make_sparse and buf == '\0'*len(buf):
++            fdst.seek(len(buf), os.SEEK_CUR)
++        else:
++            fdst.write(buf)
++    if make_sparse:
++        # Make sure the file ends where it should, even if padded out.
++        fdst.truncate()
+ 
+ def _samefile(src, dst):
+     # Macintosh, Unix.
+@@ -41,7 +51,7 @@
+     return (os.path.normcase(os.path.abspath(src)) ==
+             os.path.normcase(os.path.abspath(dst)))
+ 
+-def copyfile(src, dst):
++def copyfile(src, dst, sparse_mode=SPARSE_AUTO):
+     """Copy data from src to dst"""
+     if _samefile(src, dst):
+         raise Error, "`%s` and `%s` are the same file" % (src, dst)
+@@ -51,7 +61,19 @@
+     try:
+         fsrc = open(src, 'rb')
+         fdst = open(dst, 'wb')
+-        copyfileobj(fsrc, fdst)
++        if sparse_mode == SPARSE_NEVER:
++            make_sparse = False
++        elif sparse_mode == SPARSE_ALWAYS:
++            make_sparse = True
++        else:
++            # Assume it's AUTO
++            stat = os.fstat(fsrc.fileno())
++            if hasattr(stat, 'st_blocks') and hasattr(stat, 'st_blksize'):
++                disksize = stat.st_blocks * stat.st_blksize
++                make_sparse = (disksize < stat.st_size)
++            else:
++                make_sparse = False
++        copyfileobj(fsrc, fdst, make_sparse=make_sparse)
+     finally:
+         if fdst:
+             fdst.close()
+
