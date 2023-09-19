@@ -221,3 +221,44 @@ with open(original, 'rb') as my_file:
 ```
 
 Something like that. Let's make our own `copy_sparse` function
+
+## 2023-09-18: This Does not work
+
+WHy? FAcllocate does smarter stuff than this. And since we don't want to reinvent the wheel, we should use fallocate to do it.
+
+Found a resource that uses `fallocate` on linux in Python to do this:
+
+- [Stack Overflow Unix Stack](https://unix.stackexchange.com/questions/52012/can-a-file-that-was-originally-sparse-and-then-expected-be-made-spares-again)
+- [Example on GitHub](gist.github.com/NicolasT/1194957)
+
+In short:
+
+``` Python
+import ctypes
+import ctypes.util
+
+def _make_fallocate():
+    libc_name = ctypes.util.find_library('c')
+    libc = ctypes.CDLL(libc_name)
+
+    _fallocate = libc.fallocate
+    _fallocate.resttype = ctypes.c_int
+    _fallocate.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int64, ctypes.c_int64]
+
+    def fallocate(fd, mode, offset, length):
+        result = _fallocate(fd, mode, offset, length)
+        if result != 0:
+            raise OSError("fallocate")
+
+fallocate = _make_fallocate()
+
+FALLOC_FL_KEEP_SIZE = 0x01
+FALLOC_FL_PUNCH_HOLE = 0x02
+``` 
+
+Usage:
+
+``` python
+# punch a hold at offset 2 with a length of 3
+fallocate(fd, FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE, 2, 3)
+```
